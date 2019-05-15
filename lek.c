@@ -21,7 +21,7 @@ unsigned int ptrdiff(void* a, void* b) {
 // gc'd allocation
 void * galloc(int size){
     if (heapend == NULL) {
-        heapstart = calloc(MAX_HEAPSIZE, sizeof(char));
+        heapstart = malloc(MAX_HEAPSIZE);
         heapend = heapstart;
     }
 
@@ -29,6 +29,7 @@ void * galloc(int size){
 
     if ((ptrdiff(heapend, heapstart) + sizeof(memheader) + size) > MAX_HEAPSIZE) {
         printf("ajabaja\n");
+        //collect();
         return NULL;
     }
 
@@ -41,12 +42,50 @@ void * galloc(int size){
     header->size = size;
     header->forwarding = NULL;
 
-    // skriv över med nollor
-
     return block;
 }
 
-void collect(void *roots[]){
+void collect(void *roots[]){//The big bad function, kallar på hjälpmetoder
+
+}
+
+void memscan(memheader heado){ //Tar ett block, letar efter adresser till andra block.
+                //Allokerar nytt minne på nya heapen för att täcka sizeof current Block
+                //Antingen galloc eller annan hjälpmetod
+                //Varje gång vi hittar adress, allokera nytt block för den
+                //Har referens till senaste blocket den allokerade.
+                //har den inte allokerat något, dags att kopiera data, kalla på memcopy()
+
+            //////////////////////////////////////////////
+            ////////////  Deep, Dual-Stack   /////////////
+            //////////////////////////////////////////////
+
+            
+
+
+            //////////////////////////////////////////////
+            ///////////     Deep, Recursive     //////////
+            //////////////////////////////////////////////
+            /*galloc(heado);
+            while(nextmemory != NULL){
+                if(addressisFound()){
+                    TheList.addToList(address);
+                    ListCounter++;
+                }
+            }
+            for(address ad : theList){
+                memscan(ad);
+                ListCounter--;
+            }
+            if(ListCounter == 0){
+                memcopy(this);
+            }*/
+
+
+}
+
+void memcopy(){
+
 
 }
 
