@@ -14,6 +14,11 @@ void* heapend;
 
 // gc'd allocation
 void * galloc(int size){
+    if (heapend == NULL) {
+        heapstart = malloc(1024*1024*1024);
+        heapend = &heapstart;
+    }
+
     memheader* header = heapend;
     void* block = heapend + sizeof(memheader);
     heapend += sizeof(memheader) + size;
@@ -34,9 +39,6 @@ int main(int argc, char *argv[]) {
     printf("Hello World\n");
 
     printf("%p\n%p\n", heapend, heapstart);
-
-    heapstart = malloc(1024*1024*1024);
-    heapend = &heapstart;
     char* hej;
 
     while(1) {
