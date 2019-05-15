@@ -65,8 +65,26 @@ memheader* pop_block(memheader* stack) {
     return stack;
 }
 
+/* returns a pointer to the header of the
+   forwarded or forwarding block
+*/
+memheader* forw_header(memheader* stack) {
+    return (memheader*) stack->forwarding -1;
+}
+
+/* Takes a pointer to the new block
+ * and copies the old data to the new location
+*/
 void copy_block(memheader* block) {
     memcpy(block+1, block->forwarding, block->size);
+    block->forwarding = NULL;
+}
+
+memheader* balloc(memheader* old_block) {
+    memheader* new_block = galloc(old_block->size);
+    old_block->forwarding = new_block+1;
+    new_block->forwarding = old_block+1;
+    return new_block;
 }
 
 memheader* scan_block(memheader* block, memheader* stack) {
