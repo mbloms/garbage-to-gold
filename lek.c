@@ -4,6 +4,7 @@
 
 typedef struct header {
     void * next;
+    unsigned int size;
     void * forwarding;
 } memheader;
 
@@ -14,6 +15,7 @@ static memheader* heappointer;
 // gc'd allocation
 void * galloc(int size){
     heappointer->next = (void*)heappointer + sizeof(memheader) + size;
+    heappointer->size=size;
     printf("heappointer: %p\nnext: %p\nsizeof(memheader): %d\nsize: %d\n",heappointer, heappointer->next, sizeof(memheader), size);
     heappointer->forwarding = NULL;
     void* new_block = heappointer + sizeof(memheader);
