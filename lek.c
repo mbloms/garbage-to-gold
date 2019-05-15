@@ -97,22 +97,29 @@ void collect(memheader* block) {
     memheader* scan_stack = NULL;
     memheader* copy_stack = NULL;
 
+    gc_heap tmp = heap;
+    heap = empty;
+    empty = tmp;
 
-
-    push_block(scan_stack, block);
+    //scan_block will not balloc the initial block, only found ones.
+    push_block(balloc(block), scan_stack);
 
     while (scan_stack != NULL) {
         //Reusing "block" instead of adding new temp variable
-        block = scan_stack;
+
+        block = forw_header(scan_stack);
         scan_stack = pop_block(scan_stack);
+
         scan_stack = scan_block(block,scan_stack);
-        push_block(copy_stack, block);
+
+        push_block(copy_stack, forw_header(block));
     }
 
     while (copy_stack != NULL) {
         //Reusing "block" instead of adding new temp variable
         block = copy_stack;
         copy_stack = pop_block(copy_stack);
+
         copy_block(block);
     }
 }
