@@ -21,7 +21,7 @@ unsigned int ptrdiff(void* a, void* b) {
 // gc'd allocation
 void * galloc(int size){
     if (heapend == NULL) {
-        heapstart = malloc(MAX_HEAPSIZE);
+        heapstart = calloc(MAX_HEAPSIZE, sizeof(char));
         heapend = heapstart;
     }
 
@@ -40,6 +40,8 @@ void * galloc(int size){
     header->next = heapend;
     header->size = size;
     header->forwarding = NULL;
+
+    // skriv över med nollor
 
     return block;
 }
