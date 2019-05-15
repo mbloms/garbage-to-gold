@@ -10,8 +10,14 @@ typedef struct header {
 
 #define MAX_HEAPSIZE (1024*1024*1024)
 
-void* heapstart;
-void* heapend;
+typedef struct gc_heap {
+    void* start;
+    void* end;
+    void* gbreak;
+} gc_heap;
+
+gc_heap heap;
+gc_heap empty;
 
 unsigned int ptrdiff(void* a, void* b) {
     return ((char *)a) - ((char *)b);
@@ -20,25 +26,25 @@ unsigned int ptrdiff(void* a, void* b) {
 
 // gc'd allocation
 void * galloc(int size){
-    if (heapend == NULL) {
-        heapstart = malloc(MAX_HEAPSIZE);
-        heapend = heapstart;
+    if (heap.end == NULL) {
+
+        heap.start = malloc(MAX_HEAPSIZE);
+        heap.gbreak = heap.start;
+        heap.end = (char*) (heap.start) + MAX_HEAPSIZE;
     }
 
-    //printf("%d\n",ptrdiff(heapend, heapstart));
-
-    if ((ptrdiff(heapend, heapstart) + sizeof(memheader) + size) > MAX_HEAPSIZE) {
+    if ((ptrdiff(heap.gbreak, heap.start) + sizeof(memheader) + size) > MAX_HEAPSIZE) {
         printf("ajabaja\n");
         //collect();
         return NULL;
     }
 
-    memheader* header = heapend;
-    void* block = heapend + sizeof(memheader);
-    heapend += sizeof(memheader) + size;
+    memheader* header = heap.gbreak;
+    void* block = heap.gbreak + sizeof(memheader);
+    heap.gbreak += sizeof(memheader) + size;
     //printf("Header: %p\nBlock: %p\nHeapened: %p\n", header, block, heapend);
 
-    header->next = heapend;
+    header->next = heap.gbreak;
     header->size = size;
     header->forwarding = NULL;
 
@@ -99,8 +105,8 @@ int main(int argc, char *argv[]) {
         i++;
     }
 
-    for(memheader* p = heapstart;
-        ptrdiff(p,heapstart) < MAX_HEAPSIZE;
+    for(memheader* p = heap.start;
+        ptrdiff(p, heap.start) < MAX_HEAPSIZE;
         p=p->next) {
         printf("%p\n%s\n\n", p, p+1);
     }
