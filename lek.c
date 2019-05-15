@@ -51,46 +51,91 @@ void * galloc(int size){
     return block;
 }
 
-void collect(void *roots[]){//The big bad function, kallar på hjälpmetoder
+/* Push block onto stack and return block (new stack)
+*/
+memheader* push_block(memheader* stack, memheader* block) {
+    block->next = stack;
+    return block;
+}
+
+memheader* pop_block(memheader* stack) {
+    memheader* top_block = stack;
+    stack = stack->next;
+    top_block->next = top_block + sizeof(memheader) + top_block->size;
+    return stack;
+}
+
+void copy_block(memheader* block) {
+    memcpy(block+1, block->forwarding, block->size);
+}
+
+memheader* scan_block(memheader* block, memheader* stack) {
 
 }
 
-void memscan(memheader heado){ //Tar ett block, letar efter adresser till andra block.
-                //Allokerar nytt minne på nya heapen för att täcka sizeof current Block
-                //Antingen galloc eller annan hjälpmetod
-                //Varje gång vi hittar adress, allokera nytt block för den
-                //Har referens till senaste blocket den allokerade.
-                //har den inte allokerat något, dags att kopiera data, kalla på memcopy()
 
-            //////////////////////////////////////////////
-            ////////////  Deep, Dual-Stack   /////////////
-            //////////////////////////////////////////////
-
-            
+void collect(memheader* block) {
+    //The big bad function, kallar på hjälpmetoder
+    memheader* scan_stack = NULL;
+    memheader* copy_stack = NULL;
 
 
-            //////////////////////////////////////////////
-            ///////////     Deep, Recursive     //////////
-            //////////////////////////////////////////////
-            /*galloc(heado);
-            while(nextmemory != NULL){
-                if(addressisFound()){
-                    TheList.addToList(address);
-                    ListCounter++;
-                }
-            }
-            for(address ad : theList){
-                memscan(ad);
-                ListCounter--;
-            }
-            if(ListCounter == 0){
-                memcopy(this);
-            }*/
 
+    push_block(scan_stack, block);
 
+    while (scan_stack != NULL) {
+        //Reusing "block" instead of adding new temp variable
+        block = scan_stack;
+        scan_stack = pop_block(scan_stack);
+        scan_stack = scan_block(block,scan_stack);
+        push_block(copy_stack, block);
+    }
+
+    while (copy_stack != NULL) {
+        //Reusing "block" instead of adding new temp variable
+        block = copy_stack;
+        copy_stack = pop_block(copy_stack);
+        copy_block(block);
+    }
 }
 
-void memcopy(){
+
+//void collect(void *roots[]){
+
+//}
+
+void memscan(memheader heado){
+    //Tar ett block, letar efter adresser till andra block.
+    //Allokerar nytt minne på nya heapen för att täcka sizeof current Block
+    //Antingen galloc eller annan hjälpmetod
+    //Varje gång vi hittar adress, allokera nytt block för den
+    //Har referens till senaste blocket den allokerade.
+    //har den inte allokerat något, dags att kopiera data, kalla på memcopy()
+
+    //////////////////////////////////////////////
+    ////////////  Deep, Dual-Stack   /////////////
+    //////////////////////////////////////////////
+
+
+
+
+    //////////////////////////////////////////////
+    ///////////     Deep, Recursive     //////////
+    //////////////////////////////////////////////
+    /*galloc(heado);
+    while(nextmemory != NULL){
+        if(addressisFound()){
+            TheList.addToList(address);
+            ListCounter++;
+        }
+    }
+    for(address ad : theList){
+        memscan(ad);
+        ListCounter--;
+    }
+    if(ListCounter == 0){
+        memcopy(this);
+    }*/
 
 
 }
