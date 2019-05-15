@@ -8,19 +8,22 @@ typedef struct header {
     void * forwarding;
 } memheader;
 
-void* heap;
-static memheader* heappointer;
+void* heapstart;
+void* heapend;
 
 
 // gc'd allocation
 void * galloc(int size){
-    heappointer->next = (void*)heappointer + sizeof(memheader) + size;
-    heappointer->size=size;
-    printf("heappointer: %p\nnext: %p\nsizeof(memheader): %d\nsize: %d\n",heappointer, heappointer->next, sizeof(memheader), size);
-    heappointer->forwarding = NULL;
-    void* new_block = heappointer + sizeof(memheader);
-    heappointer = heappointer->next;
-    return new_block;
+    memheader* header = heapend;
+    void* block = heapend + sizeof(memheader);
+    heapend += sizeof(memheader) + size;
+    printf("%p\n%p\n%p\n", header, block, heapend);
+
+    header->next = heapend;
+    header->size = size;
+    header->forwarding = NULL;
+
+    return block;
 }
 
 void collect(void *roots[]){
@@ -30,16 +33,16 @@ void collect(void *roots[]){
 int main(int argc, char *argv[]) {
     printf("Hello World\n");
 
-    heap = malloc(1024*1024*1024);
-    heappointer = (memheader*) &heap;
-    char* hej;
+    printf("%p\n%p\n", heapend, heapstart);
 
-    printf("%d\n", sizeof(memheader));
+    heapstart = malloc(1024*1024*1024);
+    heapend = &heapstart;
+    char* hej;
 
     while(1) {
         hej = galloc(20);
         strcpy(hej,"hej");
-        printf("%s\n%p\n", hej,hej);
+        printf("%s\n", hej);
     }
 
 
