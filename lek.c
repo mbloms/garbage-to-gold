@@ -107,28 +107,27 @@ memheader* balloc(memheader* old_block) {
 
 
 memheader* scan_block(memheader* block, memheader* scan_stack) {
-    printf("\nblock: %p\n", block);
+    fprintf(stderr, "scanning block:\t\t%p\n", block);
     memheader** scanner = (memheader**) (block+1);
     while((memheader*) scanner < block->next) {
-        printf("\nscanner: %p\n", scanner);
-        printf("\nheap.start: %p \n*scanner: %p \nheap.end: %p\n", heap.start, *scanner, heap.end);
-
         if ((memheader*) empty.start < *scanner) {
-            printf("hej\n");
             if (*scanner < (memheader*) empty.end) {
-                printf("du\n");
+                fprintf(stderr, "found address:\t\t%p\n", *scanner);
                 memheader* found = (*scanner)-1;
-                printf("\nfound: %p\n", found);
                 if (found->forwarding == NULL) {
-                    printf("wow\n");
                     scan_stack = push_block(scan_stack, found);
                     memheader* new_block = balloc(found);
+                    fprintf(stderr,"balloc:\t\t\t%p\n", new_block);
+                    fprintf(stderr,"forwarding:\t\t%p\n", found->forwarding);
+                    fprintf(stderr,"current scanner:\t%p\n", *scanner);
                     *scanner = found->forwarding;
+                    fprintf(stderr,"updated scanner:\t%p\n", *scanner);
                 }
             }
         }
         scanner++;
     }
+    fprintf(stderr, "scanning complete!\n\n", block);
     return scan_stack;
 }
 
