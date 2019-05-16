@@ -62,7 +62,7 @@ memheader* pop_block(memheader* stack) {
     memheader* top_block = stack;
     stack = stack->next;
     //OBS!! KAN BLI FEL
-    top_block->next = top_block + sizeof(memheader) + top_block->size;
+    top_block->next = ((void*) top_block) + sizeof(memheader) + top_block->size;
     if (ptrdiff(top_block->next, top_block+1) != top_block->size) {
         fprintf(stderr, "\nWARNING: top_block->next incorrect\n");
     }
