@@ -138,17 +138,8 @@ void collect(memheader* block) {
         //forw_header gives back the old block
         block = forw_header(scan_stack);
         scan_stack = pop_block(scan_stack);
-        printf("hej\n" );
 
         scan_stack = scan_block(block,scan_stack);
-
-        push_block(copy_stack, forw_header(block));
-    }
-
-    while (copy_stack != NULL) {
-        //Reusing "block" instead of adding new temp variable
-        block = copy_stack;
-        copy_stack = pop_block(copy_stack);
 
         copy_block(block);
     }
