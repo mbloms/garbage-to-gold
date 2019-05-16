@@ -165,12 +165,14 @@ void collect(int rootlen, void** roots) {
     empty = tmp;
 
     for (int i = 0; i < rootlen; i++) {
-        block = roots[i];
-        //The header is located before the data.
-        block--;
-        //scan_block will not balloc the initial block, only found ones.
-        //push a newly allocated block on the stack:
-        scan_stack = push_block(scan_stack, balloc(block));
+        if (roots[i] != NULL) {
+            block = roots[i];
+            //The header is located before the data.
+            block--;
+            //scan_block will not balloc the initial block, only found ones.
+            //push a newly allocated block on the stack:
+            scan_stack = push_block(scan_stack, balloc(block));
+        }
     }
 
     while (scan_stack != NULL) {
@@ -192,9 +194,11 @@ void collect(int rootlen, void** roots) {
     }
 
     for (int i = 0; i < rootlen; i++) {
-        block = roots[i];
-        block--;
-        roots[i] = block->forwarding;
+        if (roots[i] != NULL) {
+            block = roots[i];
+            block--;
+            roots[i] = block->forwarding;
+        }
     }
 
 }
