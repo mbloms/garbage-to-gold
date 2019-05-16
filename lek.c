@@ -92,8 +92,6 @@ void copy_block(memheader* old_block) {
 
     memcpy(new_data, old_data, old_block->size);
 
-    new_block->forwarding = NULL;
-
     fprintf(stderr, "moving complete!\n\n" );
 }
 
@@ -117,8 +115,11 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
                 if (found->forwarding == NULL) {
                     scan_stack = push_block(scan_stack, balloc(found));
                     fprintf(stderr,"balloc:\t\t\t%p\n", scan_stack);
-                } else {
+                } else if (forw_header(forw_header(found)) == found) {
                     fprintf(stderr, "address already forwarded");
+                } else {
+                    scanner++;
+                    continue;
                 }
                 fprintf(stderr,"forwarding:\t\t%p\n", found->forwarding);
                 fprintf(stderr,"current scanner:\t%p\n", *scanner);
@@ -156,6 +157,13 @@ void collect(memheader* block) {
         scan_stack = scan_block(block,scan_stack);
 
         copy_block(block);
+    }
+
+    //reset all forwarding pointers
+    block = heap.start;
+    while (block < (memheader*) heap.gbreak) {
+        block->forwarding = NULL;
+        block = block->next;
     }
 }
 
