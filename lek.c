@@ -91,8 +91,31 @@ memheader* balloc(memheader* old_block) {
     return new_block;
 }
 
-memheader* scan_block(memheader* block, memheader* stack) {
 
+memheader* scan_block(memheader* block, memheader* scan_stack) {
+    printf("\nblock: %p\n", block);
+    memheader** scanner = (memheader**) (block+1);
+    while((memheader*) scanner < block->next) {
+        printf("\nscanner: %p\n", scanner);
+        printf("\nheap.start: %p \n*scanner: %p \nheap.end: %p\n", heap.start, *scanner, heap.end);
+
+        if ((memheader*) heap.start < *scanner) {
+            printf("hej\n");
+            if (*scanner < (memheader*) heap.end) {
+                printf("du\n");
+                memheader* found = (*scanner)-1;
+                printf("\nfound: %p\n", found);
+                if (found->forwarding == NULL) {
+                    printf("wow\n");
+                    scan_stack = push_block(scan_stack, found);
+                    memheader* new_block = balloc(found);
+                    *scanner = found->forwarding;
+                }
+            }
+        }
+        scanner++;
+    }
+    return scan_stack;
 }
 
 
@@ -171,19 +194,27 @@ void collect(memheader* block) {
 
 int main(int argc, char *argv[]) {
 
-    char* hej;
-    int i = 1;
-    for(char* hej = galloc(1024*8); hej!=NULL; hej = galloc(1024*8)) {
-        sprintf(hej,"hej %d", i);
-        //printf("Text: %s\nAmount of Hejs: %d\n", hej, i);
-        i++;
+    void* data;
+    void** p;
+
+    data = galloc(sizeof(void*));
+
+    for (size_t i = 0; i < 20; i++) {
+        p = galloc(sizeof(void*));
+        *p = data;
+        data = p;
+        printf("%p\n", *p);
     }
 
-    for(memheader* p = heap.start;
-        ptrdiff(p, heap.start) < MAX_HEAPSIZE;
-        p=p->next) {
-        printf("%p\n%s\n\n", p, p+1);
-    }
+    memheader* block = *p;
+    block--;
+
+    printf("p: %p\n", p);
+    printf("data: %p\n", *p);
+    printf("**p: %p\n", ** (void***) p);
+    printf("block: %p\n", block);
+
+    scan_block(block, NULL);
 
 
 
