@@ -73,7 +73,7 @@ memheader* pop_block(memheader* stack) {
    forwarded or forwarding block
 */
 memheader* forw_header(memheader* stack) {
-    return (memheader*) stack->forwarding -1;
+    return ((memheader*) (stack->forwarding)) -1;
 }
 
 /* Takes a pointer to the new block
