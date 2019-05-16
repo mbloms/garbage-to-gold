@@ -98,8 +98,9 @@ void copy_block(memheader* old_block) {
 }
 
 memheader* balloc(memheader* old_block) {
-    memheader* new_block = galloc(old_block->size);
-    old_block->forwarding = new_block+1;
+    memheader* new_data = galloc(old_block->size);
+    memheader* new_block = new_data-1;
+    old_block->forwarding = new_data;
     new_block->forwarding = old_block+1;
     return new_block;
 }
