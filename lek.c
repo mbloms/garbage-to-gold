@@ -79,9 +79,22 @@ memheader* forw_header(memheader* stack) {
 /* Takes a pointer to the new block
  * and copies the old data to the new location
 */
-void copy_block(memheader* block) {
-    memcpy(block+1, block->forwarding, block->size);
-    block->forwarding = NULL;
+void copy_block(memheader* old_block) {
+    void* old_data = old_block+1;
+    memheader* new_block = forw_header(old_block);
+    void* new_data = old_block->forwarding;
+
+    fprintf(stderr, "moving\n%p ->\t%p\n",old_block, new_block);
+
+    if (forw_header(new_block) != old_block) {
+        fprintf(stderr, "WARNING: forw_header(new_block) != old_block\nnew: %p\nold: %p\n", new_block, old_block);
+    }
+
+    memcpy(new_data, old_data, old_block->size);
+
+    new_block->forwarding = NULL;
+
+    fprintf(stderr, "moving complete!\n\n" );
 }
 
 memheader* balloc(memheader* old_block) {
