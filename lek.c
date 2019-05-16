@@ -155,23 +155,25 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
 /////////////////////////////////////////////
 ///////////////   Collect   /////////////////
 /////////////////////////////////////////////
-void collect(int argslen, ...) {
+void collect(int rootlen, void** roots) {
 
-void collect(memheader* block) {
-    //The big bad function, kallar på hjälpmetoder
-    memheader* scan_stack = NULL;
-    memheader* copy_stack = NULL;
+    memheader *scan_stack, *block;
+    scan_stack = NULL;
 
     gc_heap tmp = heap;
     heap = empty;
     empty = tmp;
 
-    //scan_block will not balloc the initial block, only found ones.
-    //push a newly allocated block on the stack:
-    scan_stack = push_block(scan_stack, balloc(block));
+    for (int i = 0; i < rootlen; i++) {
+        block = roots[i];
+        //The header is located before the data.
+        block--;
+        //scan_block will not balloc the initial block, only found ones.
+        //push a newly allocated block on the stack:
+        scan_stack = push_block(scan_stack, balloc(block));
+    }
 
     while (scan_stack != NULL) {
-        //Reusing "block" instead of adding new temp variable
 
         //forw_header gives back the old block
         block = forw_header(scan_stack);
@@ -188,6 +190,13 @@ void collect(memheader* block) {
         block->forwarding = NULL;
         block = block->next;
     }
+
+    for (int i = 0; i < rootlen; i++) {
+        block = roots[i];
+        block--;
+        roots[i] = block->forwarding;
+    }
+
 }
 
 
@@ -232,19 +241,17 @@ int main(int argc, char *argv[]) {
     strcpy(str, "skräp");
     list->tail->tail->tail->tail->head = str;
 
-    memheader* block = (void*) list->tail->tail->tail;
-    block--;
-    collect(block);
+    void* roots[3] = {list->head, list->tail->head, list->tail->tail};
+    collect(3, roots);
 
     while(list!=NULL) {
         printf("%p\t%p\t%s\n", list, list->head, list->head);
         list=list->tail;
     }
 
-    printf("%s\n\n" );
+    printf("%s\n%s\n\n", roots[0], roots[1]);
 
-    list=block->forwarding;
-
+    list = roots[2];
     while(list!=NULL) {
         printf("%p\t%p\t%s\n", list, list->head, list->head);
         list=list->tail;
