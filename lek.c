@@ -129,13 +129,16 @@ void collect(memheader* block) {
     empty = tmp;
 
     //scan_block will not balloc the initial block, only found ones.
-    push_block(scan_stack, balloc(block));
+    //push a newly allocated block on the stack:
+    scan_stack = push_block(scan_stack, balloc(block));
 
     while (scan_stack != NULL) {
         //Reusing "block" instead of adding new temp variable
 
+        //forw_header gives back the old block
         block = forw_header(scan_stack);
         scan_stack = pop_block(scan_stack);
+        printf("hej\n" );
 
         scan_stack = scan_block(block,scan_stack);
 
