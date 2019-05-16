@@ -115,9 +115,8 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
                 fprintf(stderr, "found address:\t\t%p\n", *scanner);
                 memheader* found = (*scanner)-1;
                 if (found->forwarding == NULL) {
-                    scan_stack = push_block(scan_stack, found);
-                    memheader* new_block = balloc(found);
-                    fprintf(stderr,"balloc:\t\t\t%p\n", new_block);
+                    scan_stack = push_block(scan_stack, balloc(found));
+                    fprintf(stderr,"balloc:\t\t\t%p\n", scan_stack);
                     fprintf(stderr,"forwarding:\t\t%p\n", found->forwarding);
                     fprintf(stderr,"current scanner:\t%p\n", *scanner);
                     *scanner = found->forwarding;
