@@ -117,11 +117,13 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
                 if (found->forwarding == NULL) {
                     scan_stack = push_block(scan_stack, balloc(found));
                     fprintf(stderr,"balloc:\t\t\t%p\n", scan_stack);
-                    fprintf(stderr,"forwarding:\t\t%p\n", found->forwarding);
-                    fprintf(stderr,"current scanner:\t%p\n", *scanner);
-                    *scanner = found->forwarding;
-                    fprintf(stderr,"updated scanner:\t%p\n", *scanner);
+                } else {
+                    fprintf(stderr, "address already forwarded");
                 }
+                fprintf(stderr,"forwarding:\t\t%p\n", found->forwarding);
+                fprintf(stderr,"current scanner:\t%p\n", *scanner);
+                *scanner = found->forwarding;
+                fprintf(stderr,"updated scanner:\t%p\n", *scanner);
             }
         }
         scanner++;
