@@ -99,9 +99,9 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
         printf("\nscanner: %p\n", scanner);
         printf("\nheap.start: %p \n*scanner: %p \nheap.end: %p\n", heap.start, *scanner, heap.end);
 
-        if ((memheader*) heap.start < *scanner) {
+        if ((memheader*) empty.start < *scanner) {
             printf("hej\n");
-            if (*scanner < (memheader*) heap.end) {
+            if (*scanner < (memheader*) empty.end) {
                 printf("du\n");
                 memheader* found = (*scanner)-1;
                 printf("\nfound: %p\n", found);
@@ -214,7 +214,7 @@ int main(int argc, char *argv[]) {
     printf("**p: %p\n", ** (void***) p);
     printf("block: %p\n", block);
 
-    scan_block(block, NULL);
+    collect(block);
 
 
 
