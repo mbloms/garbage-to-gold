@@ -19,11 +19,16 @@ typedef struct gc_heap {
 gc_heap heap;
 gc_heap empty;
 
+//////////////////////////////////////////////
+///////////////    ptrdiff    ////////////////
+//////////////////////////////////////////////
 unsigned int ptrdiff(void* a, void* b) {
     return ((char *)a) - ((char *)b);
 }
 
-
+//////////////////////////////////////////////
+////////////////    galloc    ////////////////
+//////////////////////////////////////////////
 // gc'd allocation
 void * galloc(int size){
     if (heap.end == NULL) {
@@ -51,6 +56,9 @@ void * galloc(int size){
     return block;
 }
 
+//////////////////////////////////////////////
+///////////////   push_block   ///////////////
+//////////////////////////////////////////////
 /* Push block onto stack and return block (new stack)
 */
 memheader* push_block(memheader* stack, memheader* block) {
@@ -58,6 +66,9 @@ memheader* push_block(memheader* stack, memheader* block) {
     return block;
 }
 
+//////////////////////////////////////////////
+///////////////    pop_block   ///////////////
+//////////////////////////////////////////////
 memheader* pop_block(memheader* stack) {
     memheader* top_block = stack;
     stack = stack->next;
@@ -69,6 +80,9 @@ memheader* pop_block(memheader* stack) {
     return stack;
 }
 
+//////////////////////////////////////////////
+//////////////   forw_header   ///////////////
+//////////////////////////////////////////////
 /* returns a pointer to the header of the
    forwarded or forwarding block
 */
@@ -76,6 +90,9 @@ memheader* forw_header(memheader* stack) {
     return ((memheader*) (stack->forwarding)) -1;
 }
 
+//////////////////////////////////////////////
+///////////////   copy_block   ///////////////
+//////////////////////////////////////////////
 /* Takes a pointer to the new block
  * and copies the old data to the new location
 */
@@ -103,7 +120,9 @@ memheader* balloc(memheader* old_block) {
     return new_block;
 }
 
-
+//////////////////////////////////////////////
+///////////////   scan_block   ///////////////
+//////////////////////////////////////////////
 memheader* scan_block(memheader* block, memheader* scan_stack) {
     fprintf(stderr, "scanning block:\t\t%p\n", block);
     memheader** scanner = (memheader**) (block+1);
@@ -133,6 +152,10 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
     return scan_stack;
 }
 
+/////////////////////////////////////////////
+///////////////   Collect   /////////////////
+/////////////////////////////////////////////
+void collect(int argslen, ...) {
 
 void collect(memheader* block) {
     //The big bad function, kallar på hjälpmetoder
@@ -168,45 +191,12 @@ void collect(memheader* block) {
 }
 
 
-//void collect(void *roots[]){
+/////////////////////////////////////////////
+///////////////     Main    /////////////////
+/////////////////////////////////////////////
 
-//}
-
-//void memscan(memheader heado){
-    //Tar ett block, letar efter adresser till andra block.
-    //Allokerar nytt minne på nya heapen för att täcka sizeof current Block
-    //Antingen galloc eller annan hjälpmetod
-    //Varje gång vi hittar adress, allokera nytt block för den
-    //Har referens till senaste blocket den allokerade.
-    //har den inte allokerat något, dags att kopiera data, kalla på memcopy()
-
-    //////////////////////////////////////////////
-    ////////////  Deep, Dual-Stack   /////////////
-    //////////////////////////////////////////////
-
-
-
-
-    //////////////////////////////////////////////
-    ///////////     Deep, Recursive     //////////
-    //////////////////////////////////////////////
-    /*galloc(heado);
-    while(nextmemory != NULL){
-        if(addressisFound()){
-            TheList.addToList(address);
-            ListCounter++;
-        }
-    }
-    for(address ad : theList){
-        memscan(ad);
-        ListCounter--;
-    }
-    if(ListCounter == 0){
-        memcopy(this);
-    }*/
-
-
-//}
+#define SIZE1 1000
+#define SIZE2 10000
 
 int main(int argc, char *argv[]) {
 
