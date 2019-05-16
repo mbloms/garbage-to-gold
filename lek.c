@@ -133,7 +133,7 @@ void collect(memheader* block) {
 
 //}
 
-void memscan(memheader heado){
+//void memscan(memheader heado){
     //Tar ett block, letar efter adresser till andra block.
     //Allokerar nytt minne på nya heapen för att täcka sizeof current Block
     //Antingen galloc eller annan hjälpmetod
@@ -167,7 +167,7 @@ void memscan(memheader heado){
     }*/
 
 
-}
+//}
 
 int main(int argc, char *argv[]) {
 
