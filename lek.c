@@ -197,34 +197,53 @@ void collect(memheader* block) {
 
 int main(int argc, char *argv[]) {
 
-    void* data;
-    void** p;
+    struct List {
+        char* head;
+        struct List * tail;
+    };
 
-    data = galloc(sizeof(void*));
+    struct List * list = galloc(sizeof(struct List));
+    list->tail = galloc(sizeof(struct List));
+    list->tail->tail = galloc(sizeof(struct List));
+    list->tail->tail->tail = galloc(sizeof(struct List));
+    list->tail->tail->tail->tail = galloc(sizeof(struct List));
+    list->tail->tail->tail->tail->tail = NULL;
 
-    for (size_t i = 0; i < 20; i++) {
-        p = galloc(sizeof(void*));
-        *p = data;
-        data = p;
-        printf("%p\n", *p);
-    }
+    char* str = galloc(20);
+    strcpy(str, "hej");
+    list->head = str;
 
-    memheader* block = *p;
+    str = galloc(20);
+    strcpy(str, "du");
+    list->tail->head = str;
+
+    str = galloc(20);
+    strcpy(str, "ditt");
+    list->tail->tail->head = str;
+
+    str = galloc(20);
+    strcpy(str, "lilla");
+    list->tail->tail->tail->head = str;
+
+    str = galloc(20);
+    strcpy(str, "skräp");
+    list->tail->tail->tail->tail->head = str;
+
+    memheader* block = (void*) list->tail->tail->tail;
     block--;
-
-    printf("p: %p\n", p);
-    printf("data: %p\n", *p);
-    printf("**p: %p\n", ** (void***) p);
-    printf("block: %p\n", block);
-
     collect(block);
 
+    while(list!=NULL) {
+        printf("%p\t%p\t%s\n", list, list->head, list->head);
+        list=list->tail;
+    }
 
+    printf("%s\n\n" );
 
-    //low = malloc(1024*1024*1024);
-    //empty = malloc(1024*1024*1024);
-    //printf("Skriv något\n> ");
-    //scanf("%s", high);
-    //printf("%s\n",high);
-    exit(0);
+    list=block->forwarding;
+
+    while(list!=NULL) {
+        printf("%p\t%p\t%s\n", list, list->head, list->head);
+        list=list->tail;
+    }
   }
