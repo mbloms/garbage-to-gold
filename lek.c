@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 typedef struct header {
     struct header * next;
@@ -208,56 +209,37 @@ void collect(int rootlen, void** roots) {
 ///////////////     Main    /////////////////
 /////////////////////////////////////////////
 
-#define SIZE1 1000
+#define SIZE1 100000000
 #define SIZE2 10000
 
 int main(int argc, char *argv[]) {
 
-    struct List {
-        char* head;
-        struct List * tail;
-    };
+    int h = 2;
 
-    struct List * list = galloc(sizeof(struct List));
-    list->tail = galloc(sizeof(struct List));
-    list->tail->tail = galloc(sizeof(struct List));
-    list->tail->tail->tail = galloc(sizeof(struct List));
-    list->tail->tail->tail->tail = galloc(sizeof(struct List));
-    list->tail->tail->tail->tail->tail = NULL;
+    sscanf(argv[1], "%d\n", &h);
 
-    char* str = galloc(20);
-    strcpy(str, "hej");
-    list->head = str;
+    int* a = galloc(SIZE1);
+    int* b = NULL;
+    int* c = NULL;
+    int* d = NULL;
 
-    str = galloc(20);
-    strcpy(str, "du");
-    list->tail->head = str;
-
-    str = galloc(20);
-    strcpy(str, "ditt");
-    list->tail->tail->head = str;
-
-    str = galloc(20);
-    strcpy(str, "lilla");
-    list->tail->tail->tail->head = str;
-
-    str = galloc(20);
-    strcpy(str, "skräp");
-    list->tail->tail->tail->tail->head = str;
-
-    void* roots[3] = {list->head, list->tail->head, list->tail->tail};
-    collect(3, roots);
-
-    while(list!=NULL) {
-        printf("%p\t%p\t%s\n", list, list->head, list->head);
-        list=list->tail;
+    if (h > 10) {
+        b = galloc(SIZE1);
+        d = a;
     }
-
-    printf("%s\n%s\n\n", roots[0], roots[1]);
-
-    list = roots[2];
-    while(list!=NULL) {
-        printf("%p\t%p\t%s\n", list, list->head, list->head);
-        list=list->tail;
+    else {
+        c = galloc(SIZE1);
+        b = a;
     }
+    c = NULL;
+    clock_t before, after;
+    before = clock();
+    int* x = galloc(SIZE2);
+
+    void* roots[] = {a,b,c,d,x};
+    collect(5, roots);
+    after = clock();
+    long diff = after - before;
+
+    printf("cycles: %d\n", diff);
   }
