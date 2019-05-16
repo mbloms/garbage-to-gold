@@ -106,7 +106,7 @@ void collect(memheader* block) {
     empty = tmp;
 
     //scan_block will not balloc the initial block, only found ones.
-    push_block(balloc(block), scan_stack);
+    push_block(scan_stack, balloc(block));
 
     while (scan_stack != NULL) {
         //Reusing "block" instead of adding new temp variable
