@@ -27,7 +27,7 @@ gc_heap highHeap = {NULL, NULL, NULL, HIGH};
 gc_heap lowHeap = {NULL, NULL, NULL, LOW};
 gc_heap empty = {NULL, NULL, NULL, -1};
 
-gc_heap* current_heap;
+gc_heap* current_heap = &lowHeap;
 gc_heap* old_heap;
 
 //////////////////////////////////////////////
@@ -260,6 +260,7 @@ int main(int argc, char *argv[]) {
     int* c = NULL;
     int* d = NULL;
 
+    current_heap = &highHeap;
     if (h > 10) {
         b = galloc(SIZE1);
         d = a;
@@ -268,6 +269,7 @@ int main(int argc, char *argv[]) {
         c = galloc(SIZE1);
         b = a;
     }
+    current_heap = &lowHeap;
     c = NULL;
     clock_t before, after;
     before = clock();
