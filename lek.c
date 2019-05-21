@@ -6,6 +6,7 @@
 typedef struct header {
     struct header * next;
     unsigned int size;
+    int security_level;
     void * forwarding;
 } memheader;
 
@@ -60,6 +61,7 @@ void * galloc(int size){
 
     header->next = current_heap->gbreak;
     header->size = size;
+    header->security_level = current_heap->security_level;
     header->forwarding = NULL;
 
     return block;
@@ -126,6 +128,7 @@ memheader* balloc(memheader* old_block) {
     memheader* new_block = new_data-1;
     old_block->forwarding = new_data;
     new_block->forwarding = old_block+1;
+    new_block->security_level = old_block->security_level;
     return new_block;
 }
 
