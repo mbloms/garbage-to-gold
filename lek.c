@@ -40,7 +40,10 @@ unsigned int ptrdiff(void* a, void* b) {
 //////////////////////////////////////////////
 ////////////////    galloc    ////////////////
 //////////////////////////////////////////////
-// gc'd allocation
+
+/* Works like malloc, but for our garbage collected heap
+ * Returns a pointer to the newly allocated data.
+ */
 void * galloc(int size){
     if (current_heap->end == NULL) {
 
@@ -124,6 +127,11 @@ void copy_block(memheader* old_block) {
     fprintf(stderr, "moving complete!\n\n" );
 }
 
+/* Allocate memory for a block to be copied to a new location
+ * Takes a block and allocates a new block of the same size
+ * The blocks are coupled with forwarding pointers so that
+ * the new block can be found from the old and vice versa.
+*/
 memheader* balloc(memheader* old_block) {
     memheader* new_data = galloc(old_block->size);
     memheader* new_block = new_data-1;
