@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
 typedef struct header {
     struct header * next;
@@ -130,6 +131,20 @@ memheader* balloc(memheader* old_block) {
     new_block->forwarding = old_block+1;
     new_block->security_level = old_block->security_level;
     return new_block;
+}
+
+bool addr_in_heap(void* address) {
+    if (highHeap.start < address) {
+        if (address < highHeap.end) {
+            return true;
+        }
+    }
+    if (lowHeap.start < address) {
+        if (address < lowHeap.end) {
+            return true;
+        }
+    }
+    return false;
 }
 
 //////////////////////////////////////////////
