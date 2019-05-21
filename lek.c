@@ -11,14 +11,22 @@ typedef struct header {
 
 #define MAX_HEAPSIZE (1024*1024*1024)
 
+#define LOW 0
+#define HIGH 1
+
 typedef struct gc_heap {
     void* start;
     void* end;
     void* gbreak;
+    int security_level;
 } gc_heap;
 
-gc_heap heap;
-gc_heap empty;
+gc_heap highHeap = {NULL, NULL, NULL, HIGH};
+gc_heap lowHeap = {NULL, NULL, NULL, LOW};
+gc_heap empty = {NULL, NULL, NULL, -1};
+
+gc_heap* current_heap;
+gc_heap* old_heap;
 
 //////////////////////////////////////////////
 ///////////////    ptrdiff    ////////////////
@@ -32,25 +40,25 @@ unsigned int ptrdiff(void* a, void* b) {
 //////////////////////////////////////////////
 // gc'd allocation
 void * galloc(int size){
-    if (heap.end == NULL) {
+    if (current_heap->end == NULL) {
 
-        heap.start = malloc(MAX_HEAPSIZE);
-        heap.gbreak = heap.start;
-        heap.end = (char*) (heap.start) + MAX_HEAPSIZE;
+        current_heap->start = malloc(MAX_HEAPSIZE);
+        current_heap->gbreak = current_heap->start;
+        current_heap->end = (char*) (current_heap->start) + MAX_HEAPSIZE;
     }
 
-    if ((ptrdiff(heap.gbreak, heap.start) + sizeof(memheader) + size) > MAX_HEAPSIZE) {
+    if ((ptrdiff(current_heap->gbreak, current_heap->start) + sizeof(memheader) + size) > MAX_HEAPSIZE) {
         printf("ajabaja\n");
         //collect();
         return NULL;
     }
 
-    memheader* header = heap.gbreak;
-    void* block = heap.gbreak + sizeof(memheader);
-    heap.gbreak += sizeof(memheader) + size;
+    memheader* header = current_heap->gbreak;
+    void* block = current_heap->gbreak + sizeof(memheader);
+    current_heap->gbreak += sizeof(memheader) + size;
     //printf("Header: %p\nBlock: %p\nHeapened: %p\n", header, block, heapend);
 
-    header->next = heap.gbreak;
+    header->next = current_heap->gbreak;
     header->size = size;
     header->forwarding = NULL;
 
@@ -128,8 +136,8 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
     fprintf(stderr, "scanning block:\t\t%p\n", block);
     memheader** scanner = (memheader**) (block+1);
     while((memheader*) scanner < block->next) {
-        if ((memheader*) empty.start < *scanner) {
-            if (*scanner < (memheader*) empty.end) {
+        if ((memheader*) old_heap->start < *scanner) {
+            if (*scanner < (memheader*) old_heap->end) {
                 fprintf(stderr, "found address:\t\t%p\n", *scanner);
                 memheader* found = (*scanner)-1;
                 if (found->forwarding == NULL) {
@@ -161,9 +169,13 @@ void collect(int rootlen, void** roots) {
     memheader *scan_stack, *block;
     scan_stack = NULL;
 
-    gc_heap tmp = heap;
-    heap = empty;
+    empty.security_level = current_heap->security_level;
+
+    gc_heap tmp = *current_heap;
+    *current_heap = empty;
     empty = tmp;
+
+    old_heap = &empty;
 
     for (int i = 0; i < rootlen; i++) {
         if (roots[i] != NULL) {
@@ -188,12 +200,13 @@ void collect(int rootlen, void** roots) {
     }
 
     //reset all forwarding pointers
-    block = heap.start;
-    while (block < (memheader*) heap.gbreak) {
+    block = current_heap->start;
+    while (block < (memheader*) current_heap->gbreak) {
         block->forwarding = NULL;
         block = block->next;
     }
 
+    //give back the new roots
     for (int i = 0; i < rootlen; i++) {
         if (roots[i] != NULL) {
             block = roots[i];
@@ -201,6 +214,10 @@ void collect(int rootlen, void** roots) {
             roots[i] = block->forwarding;
         }
     }
+
+    //reset the empty heap
+    empty.gbreak = empty.start;
+    empty.security_level = -1;
 
 }
 
