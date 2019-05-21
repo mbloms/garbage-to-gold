@@ -154,10 +154,11 @@ memheader* scan_block(memheader* block, memheader* scan_stack) {
     fprintf(stderr, "scanning block:\t\t%p\n", block);
     memheader** scanner = (memheader**) (block+1);
     while((memheader*) scanner < block->next) {
-        if ((memheader*) old_heap->start < *scanner) {
-            if (*scanner < (memheader*) old_heap->end) {
-                fprintf(stderr, "found address:\t\t%p\n", *scanner);
-                memheader* found = (*scanner)-1;
+        if (addr_in_heap(*scanner)) {
+            fprintf(stderr, "found address:\t\t%p\n", *scanner);
+            memheader* found = (*scanner)-1;
+
+            if (found->security_level == current_heap->security_level) {
                 if (found->forwarding == NULL) {
                     scan_stack = push_block(scan_stack, balloc(found));
                     fprintf(stderr,"balloc:\t\t\t%p\n", scan_stack);
@@ -202,7 +203,8 @@ void collect(int rootlen, void** roots) {
             block--;
             //scan_block will not balloc the initial block, only found ones.
             //push a newly allocated block on the stack:
-            scan_stack = push_block(scan_stack, balloc(block));
+            if (block->security_level <= current_heap->security_level)
+                scan_stack = push_block(scan_stack, balloc(block));
         }
     }
 
